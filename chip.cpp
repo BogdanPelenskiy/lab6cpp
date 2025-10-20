@@ -8,19 +8,42 @@ Chip::~Chip() {
 
 void Chip::inputData() {
     cout << "Скільки мікросхем хочете ввести (макс 5)? ";
-    cin >> count;
-    if (count > 5) count = 5;
+    while (!(cin >> count) || count <= 0 || count > 5) {
+        cout << "❌ Некоректне значення! Введіть число від 1 до 5: ";
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
     cin.ignore();
 
     for (int i = 0; i < count; i++) {
         cout << "\nМікросхема №" << i + 1 << ":\n";
-        cout << "Назва: ";
-        getline(cin, chips[i].name);
+
+        // ===== Назва =====
+        do {
+            cout << "Назва: ";
+            getline(cin, chips[i].name);
+            if (chips[i].name.empty()) {
+                cout << "❌ Назва не може бути порожньою! Повторіть.\n";
+            }
+        } while (chips[i].name.empty());
+
+        // ===== Кількість виводів =====
         cout << "Кількість виводів: ";
-        cin >> chips[i].pins;
+        while (!(cin >> chips[i].pins) || chips[i].pins <= 0) {
+            cout << "❌ Введіть коректне число ніжок (> 0): ";
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+
+        // ===== Напруга =====
         cout << "Напруга живлення (V): ";
-        cin >> chips[i].voltage;
-        cin.ignore();
+        while (!(cin >> chips[i].voltage) || chips[i].voltage <= 0.0) {
+            cout << "❌ Введіть коректну напругу (> 0): ";
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
     }
 }
 
@@ -35,16 +58,26 @@ void Chip::displayData() const {
 
 void Chip::showByVoltage(double v) const {
     cout << "\n=== Мікросхеми з напругою >= " << v << "V ===\n";
+    bool found = false;
     for (int i = 0; i < count; i++) {
-        if (chips[i].voltage >= v)
+        if (chips[i].voltage >= v) {
             cout << chips[i].name << " (" << chips[i].voltage << "V)\n";
+            found = true;
+        }
     }
+    if (!found)
+        cout << "Не знайдено мікросхем з такою напругою.\n";
 }
 
 void Chip::showByPins(int p) const {
     cout << "\n=== Мікросхеми з кількістю виводів >= " << p << " ===\n";
+    bool found = false;
     for (int i = 0; i < count; i++) {
-        if (chips[i].pins >= p)
+        if (chips[i].pins >= p) {
             cout << chips[i].name << " (" << chips[i].pins << " ніжок)\n";
+            found = true;
+        }
     }
+    if (!found)
+        cout << "Не знайдено мікросхем з такою кількістю виводів.\n";
 }
